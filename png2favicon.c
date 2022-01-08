@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
             0,              // Number of colors in palette
             0,              // Reserved, should be 0
             S2B(0),         // Color planes, should be 0 or 1
-            S2B(0),         // Bits per pixel, if 0 it will be inferred PNG data
+            S2B(0),         // Bits per pixel, if 0 it will be inferred from PNG data
             L2B(sizes[i]),  // Image size
             L2B(offset)     // Offset in file
         }, 1, ICONDIRENTRY_LENGTH, file);
