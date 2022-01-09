@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright © 2022 Anton Fors
 
+#ifdef _WIN32
+    // Do not throw deprecation warning for fopen on Windows
+    #define _CRT_SECURE_NO_DEPRECATE
+#endif
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -30,9 +35,8 @@ const uint8_t PNG_HEADER[] = {
 
 uint32_t read_png(char *filename, uint8_t **buffer, uint8_t *resolution) {
     // Open file for reading
-    FILE *file;
-    errno_t error = fopen_s(&file, filename, "rb");
-    if (error != 0) {
+    FILE *file = fopen(filename, "rb");
+    if (file == NULL) {
         printf("Could not open file: %s\n", filename);
         return 0;
     }
@@ -101,9 +105,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    FILE *file;
-    errno_t error = fopen_s(&file, "favicon.ico", "wb");
-    if (error != 0) {
+    FILE *file = fopen("favicon.ico", "wb");
+    if (file == NULL) {
         puts("Could not open favicon.ico for writing, exiting.");
         return 1;
     }
