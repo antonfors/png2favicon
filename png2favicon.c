@@ -2,8 +2,12 @@
 // Copyright © 2022 Anton Fors
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+// Takes pointer to byte array and converts to long, big-endian
+#define B2L_BE(p) ((uint32_t)(*(p)) << 24 | (uint32_t)(*((p) + 1)) << 16 | (uint32_t)(*((p) + 2)) << 8 | (uint32_t)(*((p) + 3)))
 
 // Utility macros to split shorts and longs to bytes, little-endian
 #define S2B(s) (uint8_t)(s), (uint8_t)((s) >> 8)
@@ -26,8 +30,9 @@ const uint8_t PNG_HEADER[] = {
 
 uint32_t read_png(char *filename, uint8_t **buffer, uint8_t *resolution) {
     // Open file for reading
-    FILE *file = fopen(filename, "r");
-    if (file == NULL) {
+    FILE *file;
+    errno_t error = fopen_s(&file, filename, "rb");
+    if (error != 0) {
         printf("Could not open file: %s\n", filename);
         return 0;
     }
@@ -45,8 +50,8 @@ uint32_t read_png(char *filename, uint8_t **buffer, uint8_t *resolution) {
         fread(*buffer, 1, size, file);
 
         if (memcmp(*buffer, PNG_HEADER, sizeof(PNG_HEADER)) == 0) {
-            uint32_t width = ntohl(*(uint32_t*)(*buffer + 16));
-            uint32_t height = ntohl(*(uint32_t*)(*buffer + 20));
+            uint32_t width = B2L_BE(*buffer + 16);
+            uint32_t height = B2L_BE(*buffer + 20);
 
             if (width == height && width >= 1 && width <= 256) {
                 *resolution = (uint8_t)width;
@@ -96,8 +101,9 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    FILE *file = fopen("favicon.ico", "w");
-    if (file == NULL) {
+    FILE *file;
+    errno_t error = fopen_s(&file, "favicon.ico", "wb");
+    if (error != 0) {
         puts("Could not open favicon.ico for writing, exiting.");
         return 1;
     }
